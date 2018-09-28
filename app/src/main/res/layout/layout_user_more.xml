@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginBottom="20dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/lay1"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginTop="13dp"
+                android:layout_marginBottom="2dp"
+                android:id="@+id/text1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="次数"
+                android:textColor="@color/tablayout_tv_gray"
+                android:textSize="13sp" />
+            <TextView
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_below="@+id/text1"
+                android:id="@+id/text2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="总数:"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_below="@+id/text1"
+                android:layout_toRightOf="@+id/text2"
+                android:id="@+id/total_count_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="19"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_marginRight="5dp"
+                android:layout_below="@+id/text2"
+                android:id="@+id/text3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="剩余:"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_below="@+id/text2"
+                android:layout_toRightOf="@+id/text2"
+                android:id="@+id/last_count_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginTop="13dp"
+                android:layout_marginBottom="2dp"
+                android:id="@+id/text4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="金额"
+                android:textColor="@color/tablayout_tv_gray"
+                android:textSize="13sp" />
+            <TextView
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_below="@+id/text4"
+                android:id="@+id/text5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="总金额:"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_below="@+id/text4"
+                android:layout_toRightOf="@+id/text5"
+                android:id="@+id/total_money_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3000"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_marginRight="5dp"
+                android:layout_below="@+id/text5"
+                android:id="@+id/text6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="剩余:    "
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_below="@+id/text5"
+                android:layout_toRightOf="@+id/text6"
+                android:id="@+id/last_money_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1200"
+                android:textColor="@color/elegant_publish_title"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:paddingTop="10dp"
+            android:orientation="vertical"
+            android:layout_weight="0.5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/btn_bg_red_selector"
+                    android:text="充值"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:id="@+id/recharge_btn"
+                    android:padding="5dp"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp"/>
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:background="@drawable/btn_bg_blue_selector"
+                    android:text="签到"
+                    android:textColor="@color/white"
+                    android:id="@+id/sign_btn"
+                    android:padding="5dp"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+    <RelativeLayout
+        android:visibility="gone"
+        android:layout_below="@+id/lay1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:paddingTop="15dp"
+            android:paddingBottom="12dp"
+            android:paddingRight="10dp"
+            android:id="@+id/comments_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="综合评分:1200"
+            android:textColor="@color/elegant_publish_title"
+            android:textSize="16sp" />
+    </RelativeLayout>
+</RelativeLayout>
