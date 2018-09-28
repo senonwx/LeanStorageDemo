@@ -46,7 +46,7 @@ public abstract class BaseActivity<V extends BaseView,P extends BasePresenter<V>
 
     public AVUtil getAVManager(){
         if(a == null){
-            return new AVUtil();
+            return new AVUtil(this);
         }
         return a;
     }

@@ -8,6 +8,7 @@ import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.FindCallback;
+import com.avos.avoscloud.GetCallback;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
@@ -31,6 +32,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import butterknife.BindView;
@@ -46,13 +48,13 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     @BindView(R.id.lrv)
     LRecyclerView lrv;
 
-    private RecyclerAdapter<UserReview> adapter;
+    private RecyclerAdapter<AVObject> adapter;
     private LRecyclerViewAdapter mLRecyclerViewAdapter;
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
-    private List<UserReview> mData = new ArrayList<>();//原始数据
-    private List<UserReview> tempData = new ArrayList<>();//间接数据
+    private List<AVObject> mData = new ArrayList<>();//原始数据
+    private List<AVObject> tempData = new ArrayList<>();//间接数据
     private UserReviewDt userBeanDt = new UserReviewDt();
     private UserDetailsDt userDetailsDt = new UserDetailsDt();
     private DialogAdd$Del dialogAdd$Del;
@@ -72,29 +74,40 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     }
 
     private void initData() {
-        mData.clear();
-        mData.addAll(userBeanDt.getAll());
+        AVQuery<Student> student = AVObject.getQuery(Student.class);
+        getAVManager().setOnAVUtilListener(student, new AVUtil.OnAVUtilListener() {
+            @Override
+            public void onSuccess(List<AVObject> list) {
+                if(list == null || list.size() == 0){
+                    ToastUtil.showShortToast("没有数据！");
+                }else{
+                    mData.clear();
+                    mData.addAll(list);
+                }
+                mLRecyclerViewAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void initLrv() {
-
         LinearLayoutManager manager = new LinearLayoutManager(this);
         lrv.setLayoutManager(manager);
         lrv.setRefreshProgressStyle(ProgressStyle.LineSpinFadeLoader); //设置下拉刷新Progress的样式
 //        lrv.setArrowImageView(R.mipmap.news_renovate);  //设置下拉刷新箭头
         lrv.setLoadingMoreProgressStyle(ProgressStyle.BallSpinFadeLoader);
-        adapter = new RecyclerAdapter<UserReview>(this, mData, R.layout.item_main_lrv) {
+        adapter = new RecyclerAdapter<AVObject>(this, mData, R.layout.item_main_lrv) {
             @Override
-            public void convert(final RecycleHolder helper, final UserReview item, final int position) {
-                helper.setText(R.id.name_tv, item.getName());
-                helper.setText(R.id.count_tv, item.getLast_count());
-                helper.setText(R.id.time_tv, item.getSignTime());
+            public void convert(final RecycleHolder helper, final AVObject item, final int position) {
+                final Student student = (Student) item;
+                helper.setText(R.id.name_tv, student.getName());
+                helper.setText(R.id.count_tv, student.getLastCount());
+                helper.setText(R.id.time_tv, student.getSignTime());
 
                 helper.setOnClickListener(R.id.lay, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         startActivity(new Intent(MainActivity.this, UserActivity.class)
-                                .putExtra("name", item.getName()));
+                                .putExtra("name", student.getName()));
                     }
                 });
             }
@@ -133,7 +146,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     public void setConfirmClickListener(final String name) {
                         AVQuery<Student> student = AVObject.getQuery(Student.class);
                         student.whereEqualTo(Student.NAME, name);
-                        getAVManager().setOnAVUtilListener(student, new AVUtil.OnAVUtilListener() {
+                        getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
                             @Override
                             public void onSuccess(List<AVObject> list) {
                                 if(list == null || list.size() == 0){
@@ -141,29 +154,12 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                                     stu.setName(name);
                                     stu.saveInBackground();
 
-                                    mLRecyclerViewAdapter.notifyDataSetChanged();
+                                    initData();
                                 }else{
-                                    ToastUtil.showShortToast("已存在该学员");
+                                    ToastUtil.showShortToast("姓名重复，请重新输入！");
                                 }
                             }
                         });
-
-
-//                        UserReview user = userBeanDt.findByName(name);
-//                        if(user != null){
-//                            ToastUtil.showShortToast("该学员已存在");
-//                            return;
-//                        }
-//                        user = new UserReview();
-//                        user.setName(name);
-//                        user.setTotal_count(0);
-//                        user.setLast_count(0);
-//                        user.setTotal_money(0);
-//                        user.setLast_money(0);
-//                        user.setSignTime("");
-//                        userBeanDt.insert(user);
-//                        initData();
-//                        mLRecyclerViewAdapter.notifyDataSetChanged();
                         dialogAdd$Del.dismiss();
                     }
                 });
@@ -173,15 +169,9 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                 dialogAdd$Del = new DialogAdd$Del(MainActivity.this, "请输入要删除的学员名字");
                 dialogAdd$Del.setConfirmClickListener(new DialogAdd$Del.OnClickListener() {
                     @Override
-                    public void setConfirmClickListener(String name) {
-                        UserReview user = userBeanDt.findByName(name);
-                        if (user == null) {
-                            ToastUtil.showShortToast("该学员不存在");
-                            return;
-                        }
-
+                    public void setConfirmClickListener(final String name) {
+                        setSweetDialog(name,"确认删除?", "删除之后将不能恢复!");
                         dialogAdd$Del.dismiss();
-                        setSweetDialog(name, "确认删除?", "删除之后将不能恢复!");
                     }
                 });
                 dialogAdd$Del.show();
@@ -206,12 +196,34 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         sDialog.dismiss();
+                        final AVQuery<Student> student = AVObject.getQuery(Student.class);
+                        student.whereEqualTo(Student.NAME, name);
+                        getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
+                            @Override
+                            public void onSuccess(List<AVObject> list) {
+                                if(list == null || list.size() == 0){
+                                    ToastUtil.showShortToast("姓名输入错误，未找到学员！");
+                                }else{
+                                    AVQuery<Student> q = AVObject.getQuery(Student.class);
+                                    q.getFirstInBackground(new GetCallback<Student>() {
+                                        @Override
+                                        public void done(Student student, AVException e) {
+                                            student.deleteInBackground();
 
-                        userBeanDt.delete(name);
-                        userDetailsDt.delete(name);
-
-                        initData();
-                        mLRecyclerViewAdapter.notifyDataSetChanged();
+                                            AVQuery<Student> studentAVQuery = AVQuery.getQuery(Student.class);
+                                            studentAVQuery.findInBackground(new FindCallback<Student>() {
+                                                @Override
+                                                public void done(List<Student> list, AVException e) {
+                                                    list.toString();
+                                                }
+                                            });
+                                        }
+                                    });
+//                                    ((Student)list.get(0)).deleteInBackground();
+                                    initData();
+                                }
+                            }
+                        });
                     }
                 });
         sad.show();
