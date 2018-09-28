@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
+import com.avos.avoscloud.AVCloudQueryResult;
 import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
+import com.avos.avoscloud.CloudQueryCallback;
 import com.avos.avoscloud.FindCallback;
 import com.avos.avoscloud.GetCallback;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
@@ -197,28 +199,32 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     public void onClick(SweetAlertDialog sDialog) {
                         sDialog.dismiss();
                         final AVQuery<Student> student = AVObject.getQuery(Student.class);
-                        student.whereEqualTo(Student.NAME, name);
+//                        student.whereEqualTo(Student.NAME, name);
+                        student.findInBackground(new FindCallback<Student>() {
+                            @Override
+                            public void done(List<Student> list, AVException e) {
+                                String objectId = (list.get(0)).getString("objectId");
+                            }
+                        });
                         getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
                             @Override
                             public void onSuccess(List<AVObject> list) {
                                 if(list == null || list.size() == 0){
                                     ToastUtil.showShortToast("姓名输入错误，未找到学员！");
                                 }else{
-                                    AVQuery<Student> q = AVObject.getQuery(Student.class);
-                                    q.getFirstInBackground(new GetCallback<Student>() {
+                                    list.get(0).getString("title");
+                                    String objectId = (list.get(0)).getObjectId();
+                                    String cql = " delete from Student where objectId = ? ";
+                                    AVQuery.doCloudQueryInBackground(cql, new CloudQueryCallback() {
                                         @Override
-                                        public void done(Student student, AVException e) {
-                                            student.deleteInBackground();
-
-                                            AVQuery<Student> studentAVQuery = AVQuery.getQuery(Student.class);
-                                            studentAVQuery.findInBackground(new FindCallback<Student>() {
-                                                @Override
-                                                public void done(List<Student> list, AVException e) {
-                                                    list.toString();
-                                                }
-                                            });
+                                        public void done(AVCloudQueryResult avCloudQueryResult, AVException e) {
+                                            if (e == null) {
+                                                // 操作成功
+                                            } else {
+                                                e.printStackTrace();
+                                            }
                                         }
-                                    });
+                                    }, objectId);
 //                                    ((Student)list.get(0)).deleteInBackground();
                                     initData();
                                 }
