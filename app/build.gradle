@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 26
@@ -23,21 +22,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    greendao {
-        /**
-         * 版本号
-         */
-        schemaVersion 1
-        /**
-         * greendao输出dao的数据库操作实体类文件夹（相对路径 包名+自定义路径名称，包将创建于包名的直接路径下）
-         */
-        daoPackage 'com.senon.leanstoragedemo.greendao'
 
-        /**
-         * greenDao实体类包文件夹
-         */
-        targetGenDir 'src/main/java/'
-    }
 }
 
 dependencies {
@@ -57,6 +42,5 @@ dependencies {
     implementation 'com.github.jdsjlzx:LRecyclerView:1.5.0'//带下拉刷新的列表控件
     implementation 'com.github.f0ris.sweetalert:library:1.5.1'
 
-    compile 'org.greenrobot:greendao:3.2.2'
     implementation 'org.greenrobot:eventbus:3.1.1'
 }

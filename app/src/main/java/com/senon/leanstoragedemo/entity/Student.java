@@ -3,18 +3,16 @@ package com.senon.leanstoragedemo.entity;
 import com.avos.avoscloud.AVClassName;
 import com.avos.avoscloud.AVFile;
 import com.avos.avoscloud.AVObject;
-
-import java.util.Date;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * 实体--学生
  */
 @AVClassName("Student")
-public class Student extends AVObject {
+public class Student extends AVObject implements Serializable {
   public static final Creator CREATOR = AVObjectCreator.instance;//可序列化
 
-  public static final String OBJECT_ID = "objectId";//唯一id
   public static final String NAME = "student_name";//姓名
   public static final String TOTAL_COUNT = "total_count";//总数
   public static final String LAST_COUNT = "last_count";//剩余数
@@ -29,13 +27,6 @@ public class Student extends AVObject {
 
 
   public Student() {
-  }
-
-  public String getObjectId() {
-    return getString(OBJECT_ID);
-  }
-  public void setObjectId(String objectId) {
-    put(OBJECT_ID, objectId);
   }
 
   public String getName() {
@@ -101,11 +92,11 @@ public class Student extends AVObject {
     put(AVATAR, avatar);
   }
 
-  public Date getCreateTime() {
-    return getDate(CREATE_AT);
-  }
-  public Date getUpdateTime() {
-    return getDate(UPDATE_AT);
-  }
+//  public Date getCreateTime() {
+//    return getDate(CREATE_AT);
+//  }
+//  public Date getUpdateTime() {
+//    return getDate(UPDATE_AT);
+//  }
 
 }

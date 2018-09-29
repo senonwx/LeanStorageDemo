@@ -3,7 +3,13 @@ package com.senon.leanstoragedemo.base;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.avos.avoscloud.AVObject;
 import com.senon.leanstoragedemo.AVUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 
@@ -56,6 +62,27 @@ public abstract class BaseActivity<V extends BaseView,P extends BasePresenter<V>
         super.onDestroy();
         if(presenter != null){
             presenter.detachView();
+        }
+    }
+
+    protected <T extends AVObject> String prettyJSON(List<T> objects) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (AVObject object : objects) {
+            sb.append(prettyJSON(object));
+            sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    protected String prettyJSON(AVObject object) {
+        JSONObject jsonObject = object.toJSONObject();
+        try {
+            return jsonObject.toString(2);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return object.toString();
         }
     }
 }

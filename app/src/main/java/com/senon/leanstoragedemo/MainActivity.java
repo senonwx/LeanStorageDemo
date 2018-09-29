@@ -3,14 +3,8 @@ package com.senon.leanstoragedemo;
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
-
-import com.avos.avoscloud.AVCloudQueryResult;
-import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
-import com.avos.avoscloud.CloudQueryCallback;
-import com.avos.avoscloud.FindCallback;
-import com.avos.avoscloud.GetCallback;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
@@ -22,21 +16,14 @@ import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.base.BaseResponse;
 import com.senon.leanstoragedemo.contract.MainContract;
 import com.senon.leanstoragedemo.entity.Student;
-import com.senon.leanstoragedemo.greendaoentity.UserReview;
-import com.senon.leanstoragedemo.greendaoutil.UserDetailsDt;
-import com.senon.leanstoragedemo.greendaoutil.UserReviewDt;
 import com.senon.leanstoragedemo.presenter.MainPresenter;
 import com.senon.leanstoragedemo.util.BaseEvent;
 import com.senon.leanstoragedemo.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -55,10 +42,9 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
+    private int pageLimit = 10;//每页条数
     private List<AVObject> mData = new ArrayList<>();//原始数据
     private List<AVObject> tempData = new ArrayList<>();//间接数据
-    private UserReviewDt userBeanDt = new UserReviewDt();
-    private UserDetailsDt userDetailsDt = new UserDetailsDt();
     private DialogAdd$Del dialogAdd$Del;
 
 
@@ -71,31 +57,13 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     public void init() {
         EventBus.getDefault().register(this);
 
-        initData();
         initLrv();
-    }
-
-    private void initData() {
-        AVQuery<Student> student = AVObject.getQuery(Student.class);
-        getAVManager().setOnAVUtilListener(student, new AVUtil.OnAVUtilListener() {
-            @Override
-            public void onSuccess(List<AVObject> list) {
-                if(list == null || list.size() == 0){
-                    ToastUtil.showShortToast("没有数据！");
-                }else{
-                    mData.clear();
-                    mData.addAll(list);
-                }
-                mLRecyclerViewAdapter.notifyDataSetChanged();
-            }
-        });
     }
 
     private void initLrv() {
         LinearLayoutManager manager = new LinearLayoutManager(this);
         lrv.setLayoutManager(manager);
         lrv.setRefreshProgressStyle(ProgressStyle.LineSpinFadeLoader); //设置下拉刷新Progress的样式
-//        lrv.setArrowImageView(R.mipmap.news_renovate);  //设置下拉刷新箭头
         lrv.setLoadingMoreProgressStyle(ProgressStyle.BallSpinFadeLoader);
         adapter = new RecyclerAdapter<AVObject>(this, mData, R.layout.item_main_lrv) {
             @Override
@@ -109,33 +77,87 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     @Override
                     public void onClick(View v) {
                         startActivity(new Intent(MainActivity.this, UserActivity.class)
-                                .putExtra("name", student.getName()));
+                                .putExtra("student", item));
                     }
                 });
             }
         };
         mLRecyclerViewAdapter = new LRecyclerViewAdapter(adapter);
         lrv.setAdapter(mLRecyclerViewAdapter);
-        lrv.setLoadMoreEnabled(false);
-        lrv.setPullRefreshEnabled(false);
         //设置底部加载颜色
         lrv.setFooterViewColor(R.color.color_blue, R.color.text_gray, R.color.elegant_bg);
         lrv.setHeaderViewColor(R.color.color_blue, R.color.text_gray, R.color.elegant_bg);
         lrv.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                getFirstPageData();
+                getFirstPageData();
             }
         });
         lrv.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-//                isLoadMore = true;
-//                currentPage++;
-//                getOrderList();
+                isLoadMore = true;
+                currentPage++;
+                getOrderList();
             }
         });
+        lrv.forceToRefresh();
+    }
 
+    /**
+     * 获取第一页数据
+     */
+    private void getFirstPageData() {
+        isDownRefesh = true;
+        currentPage = 0;
+        getOrderList();
+    }
+
+    private void getForceToRefresh(){
+        lrv.scrollToPosition(0);
+        currentPage = 0;
+        isLoadMore = false;
+        isDownRefesh = false;
+        lrv.forceToRefresh();
+    }
+
+    private void getOrderList() {
+        AVQuery<Student> student = AVObject.getQuery(Student.class);
+        student.limit(pageLimit);// 最多返回 10 条结果
+        student.skip(currentPage * pageLimit);// 跳过 10 * 当前页数 条结果
+        getAVManager().setOnAVUtilListener(student, new AVUtil.OnAVUtilListener() {
+            @Override
+            public void onSuccess(List<AVObject> list) {
+                result(list);
+            }
+        });
+    }
+
+    private void result(List<AVObject> data){
+        tempData.clear();
+        tempData.addAll(data);
+        if (tempData.size() == 0 && mData.size() > 0 && isLoadMore) {//最后一页时
+            lrv.setNoMore(true);
+            isLoadMore = false;
+        } else if (isDownRefesh) {//下拉刷新时
+            mData.clear();
+            mData.addAll(tempData);
+            refreshData();
+        } else {//加载更多时
+            mData.addAll(tempData);
+            refreshData();
+        }
+//        empty_img.setVisibility(mData.size() > 0 ? View.GONE:View.VISIBLE);
+    }
+
+    private void refreshData() {
+        if (lrv == null) {
+            return;
+        }
+        lrv.refreshComplete(currentPage);
+        mLRecyclerViewAdapter.notifyDataSetChanged();
+        isDownRefesh = false;
+        isLoadMore = false;
     }
 
     @OnClick({R.id.add_igv, R.id.detele_igv})
@@ -146,18 +168,18 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                 dialogAdd$Del.setConfirmClickListener(new DialogAdd$Del.OnClickListener() {
                     @Override
                     public void setConfirmClickListener(final String name) {
-                        AVQuery<Student> student = AVObject.getQuery(Student.class);
+                        AVQuery<Student> student = AVQuery.getQuery(Student.class);
                         student.whereEqualTo(Student.NAME, name);
-                        getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
+                        getAVManager().setOnAVUtilListener(student, true, new AVUtil.OnAVUtilListener() {
                             @Override
                             public void onSuccess(List<AVObject> list) {
-                                if(list == null || list.size() == 0){
+                                if (list == null || list.size() == 0) {
                                     Student stu = new Student();
-                                    stu.setName(name);
+                                    stu.put(Student.NAME,name);
                                     stu.saveInBackground();
 
-                                    initData();
-                                }else{
+                                    getForceToRefresh();
+                                } else {
                                     ToastUtil.showShortToast("姓名重复，请重新输入！");
                                 }
                             }
@@ -172,7 +194,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                 dialogAdd$Del.setConfirmClickListener(new DialogAdd$Del.OnClickListener() {
                     @Override
                     public void setConfirmClickListener(final String name) {
-                        setSweetDialog(name,"确认删除?", "删除之后将不能恢复!");
+                        setSweetDialog(name, "确认删除?", "删除之后将不能恢复!");
                         dialogAdd$Del.dismiss();
                     }
                 });
@@ -198,35 +220,16 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         sDialog.dismiss();
-                        final AVQuery<Student> student = AVObject.getQuery(Student.class);
-//                        student.whereEqualTo(Student.NAME, name);
-                        student.findInBackground(new FindCallback<Student>() {
-                            @Override
-                            public void done(List<Student> list, AVException e) {
-                                String objectId = (list.get(0)).getString("objectId");
-                            }
-                        });
+                        AVQuery<AVObject> student = new AVQuery<>("Student");
+                        student.whereEqualTo(Student.NAME, name);
                         getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
                             @Override
                             public void onSuccess(List<AVObject> list) {
                                 if(list == null || list.size() == 0){
                                     ToastUtil.showShortToast("姓名输入错误，未找到学员！");
                                 }else{
-                                    list.get(0).getString("title");
-                                    String objectId = (list.get(0)).getObjectId();
-                                    String cql = " delete from Student where objectId = ? ";
-                                    AVQuery.doCloudQueryInBackground(cql, new CloudQueryCallback() {
-                                        @Override
-                                        public void done(AVCloudQueryResult avCloudQueryResult, AVException e) {
-                                            if (e == null) {
-                                                // 操作成功
-                                            } else {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }, objectId);
-//                                    ((Student)list.get(0)).deleteInBackground();
-                                    initData();
+                                    (list.get(0)).deleteInBackground();
+                                    getForceToRefresh();
                                 }
                             }
                         });
@@ -264,8 +267,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     public void onDataSynEvent(BaseEvent event) {
         int code = event.getCode();
         if (code == 1 || code == 2 || code == 3 || code == 4) {//1签到  2签到修改 3充值  4删除了历史记录
-            initData();
-            mLRecyclerViewAdapter.notifyDataSetChanged();
+            getForceToRefresh();
         }
     }
 }

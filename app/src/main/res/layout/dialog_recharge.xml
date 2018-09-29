@@ -134,6 +134,7 @@
                 android:textSize="15sp"/>
 
             <EditText
+                android:inputType="number"
                 android:digits="1234567890"
                 android:maxLength="2"
                 android:id="@+id/count_tv"

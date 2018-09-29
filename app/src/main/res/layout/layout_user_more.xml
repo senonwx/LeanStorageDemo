@@ -42,7 +42,7 @@
                 android:id="@+id/total_count_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="19"
+                android:text="0"
                 android:textColor="@color/elegant_publish_title"
                 android:textSize="16sp" />
             <TextView
@@ -60,7 +60,7 @@
                 android:id="@+id/last_count_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4"
+                android:text="0"
                 android:textColor="@color/elegant_publish_title"
                 android:textSize="16sp" />
         </RelativeLayout>
@@ -94,7 +94,7 @@
                 android:id="@+id/total_money_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3000"
+                android:text="0"
                 android:textColor="@color/elegant_publish_title"
                 android:textSize="16sp" />
             <TextView
@@ -112,7 +112,7 @@
                 android:id="@+id/last_money_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1200"
+                android:text="0"
                 android:textColor="@color/elegant_publish_title"
                 android:textSize="16sp" />
         </RelativeLayout>

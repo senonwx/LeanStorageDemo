@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 import android.widget.TextView;
-
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.AVQuery;
+import com.avos.avoscloud.DeleteCallback;
+import com.avos.avoscloud.GetCallback;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
@@ -15,22 +19,18 @@ import com.senon.leanstoragedemo.adapter.RecyclerAdapter;
 import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.base.BaseResponse;
 import com.senon.leanstoragedemo.contract.UserContract;
-import com.senon.leanstoragedemo.greendaoentity.UserDetails;
-import com.senon.leanstoragedemo.greendaoentity.UserReview;
-import com.senon.leanstoragedemo.greendaoutil.UserDetailsDt;
-import com.senon.leanstoragedemo.greendaoutil.UserReviewDt;
+import com.senon.leanstoragedemo.entity.Student;
+import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.presenter.UserPresenter;
 import com.senon.leanstoragedemo.util.BaseEvent;
 import com.senon.leanstoragedemo.util.ComUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -54,19 +54,16 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     @BindView(R.id.last_money_tv)
     TextView last_money_tv;
 
-    private RecyclerAdapter<UserDetails> adapter;
+    private RecyclerAdapter<AVObject> adapter;
     private LRecyclerViewAdapter mLRecyclerViewAdapter;
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
-    private List<UserDetails> mData = new ArrayList<>();//原始数据
-    private List<UserDetails> tempData = new ArrayList<>();//间接数据
-    private UserReviewDt userReviewDt = new UserReviewDt();
-    private UserDetailsDt userDetailsDt = new UserDetailsDt();//学员详细信息操作类
-    private String name;//学员姓名
-    private UserReview userReview;//该学员概述信息
+    private int pageLimit = 10;//每页条数
+    private List<AVObject> mData = new ArrayList<>();//原始数据
+    private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogRecharge dialogRecharge;
-
+    private Student student;
 
     @Override
     public int getLayoutId() {
@@ -76,33 +73,95 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     @Override
     public void init() {
         EventBus.getDefault().register(this);
+        student = (Student) getIntent().getSerializableExtra("student");
+        name_tv.setText(student.getName()+"的历史记录");
 
-        name = getIntent().getStringExtra("name");
-        name_tv.setText(name+"的历史记录");
-
-        initData();
         initLrv();
+        setData();
     }
 
-    private void initData(){
-        mData.clear();
-        mData.addAll(userDetailsDt.getAllByName(name));
-        userReview = userReviewDt.findByName(name);
-
-        total_count_tv.setText(userReview.getTotal_count()+"");
-        last_count_tv.setText(userReview.getLast_count()+"");
-        total_money_tv.setText(userReview.getTotal_money()+"");
-        last_money_tv.setText(userReview.getLast_money()+"");
+    private void getOrderList() {
+        AVQuery<StudentDetails> details = AVObject.getQuery(StudentDetails.class);
+        details.whereEqualTo(StudentDetails.OWNER, student);
+        details.limit(pageLimit);// 最多返回 10 条结果
+        details.skip(currentPage * pageLimit);// 跳过 10 * 当前页数 条结果
+        getAVManager().setOnAVUtilListener(details, new AVUtil.OnAVUtilListener() {
+            @Override
+            public void onSuccess(List<AVObject> list) {
+                result(list);
+            }
+        });
     }
+
+    /**
+     * 获取第一页数据
+     */
+    private void getFirstPageData() {
+        isDownRefesh = true;
+        currentPage = 0;
+        getOrderList();
+    }
+
+    private void getForceToRefresh(){
+        lrv.scrollToPosition(0);
+        currentPage = 0;
+        isLoadMore = false;
+        isDownRefesh = false;
+        lrv.forceToRefresh();
+    }
+
+    private void result(List<AVObject> data){
+        tempData.clear();
+        tempData.addAll(data);
+        if (tempData.size() == 0 && mData.size() > 0 && isLoadMore) {//最后一页时
+            lrv.setNoMore(true);
+            isLoadMore = false;
+        } else if (isDownRefesh) {//下拉刷新时
+            mData.clear();
+            mData.addAll(tempData);
+            refreshData();
+        } else {//加载更多时
+            mData.addAll(tempData);
+            refreshData();
+        }
+
+    }
+
+    private void setData(){
+        AVQuery<Student> avQuery = AVQuery.getQuery(Student.class);
+        avQuery.getInBackground(student.getObjectId(), new GetCallback<Student>() {
+            @Override
+            public void done(Student stu, AVException e) {
+                student = stu;
+                total_count_tv.setText(student.getTotalCount()+"");
+                last_count_tv.setText(student.getLastCount()+"");
+                total_money_tv.setText(student.getTotalMoney()+"");
+                last_money_tv.setText(student.getLastMoney()+"");
+            }
+        });
+
+    }
+
+    private void refreshData() {
+        if (lrv == null) {
+            return;
+        }
+        lrv.refreshComplete(currentPage);
+        mLRecyclerViewAdapter.notifyDataSetChanged();
+        isDownRefesh = false;
+        isLoadMore = false;
+    }
+
     private void initLrv() {
         LinearLayoutManager manager = new LinearLayoutManager(this);
         lrv.setLayoutManager(manager);
         lrv.setRefreshProgressStyle(ProgressStyle.LineSpinFadeLoader); //设置下拉刷新Progress的样式
 //        lrv.setArrowImageView(R.mipmap.news_renovate);  //设置下拉刷新箭头
         lrv.setLoadingMoreProgressStyle(ProgressStyle.BallSpinFadeLoader);
-        adapter = new RecyclerAdapter<UserDetails>(this, mData, R.layout.item_user_lrv) {
+        adapter = new RecyclerAdapter<AVObject>(this, mData, R.layout.item_user_lrv) {
             @Override
-            public void convert(final RecycleHolder helper, final UserDetails item, final int position) {
+            public void convert(final RecycleHolder helper, final AVObject data, final int position) {
+                final StudentDetails item = (StudentDetails) data;
                 helper.setVisible(R.id.title_tv,position == 0);
                 helper.setText(R.id.time_tv,item.getTime());
 
@@ -125,9 +184,9 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
                     public void onClick(View v) {
                         if(item.getFlag() == 1) {
                             startActivity(new Intent(UserActivity.this,SignActivity.class)
-                                    .putExtra("name",name)
+                                    .putExtra("name",item.getName())
                                     .putExtra("state",0)
-                                    .putExtra("time",item.getTime()));
+                                    .putExtra("details", (Serializable) item));
                         }
 
                     }
@@ -147,12 +206,12 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
                             @Override
                             public void onItemClick(int position) {
                                 if(position == 0){
-                                    setSweetDialog(item.getFlag(),name,item.getTime(),"确认删除?","删除记录之后将不能恢复!");
+                                    setSweetDialog(item, "确认删除?","删除记录之后将不能恢复!");
                                 }else if(position == 1){
                                     startActivity(new Intent(UserActivity.this,SignActivity.class)
-                                            .putExtra("name",name)
+                                            .putExtra("name",item.getName())
                                             .putExtra("state",2)
-                                            .putExtra("time",item.getTime()));
+                                            .putExtra("details",(Serializable)item));
                                 }
                             }
                         }).show();
@@ -163,29 +222,29 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
         };
         mLRecyclerViewAdapter = new LRecyclerViewAdapter(adapter);
         lrv.setAdapter(mLRecyclerViewAdapter);
-        lrv.setLoadMoreEnabled(false);
-        lrv.setPullRefreshEnabled(false);
+//        lrv.setLoadMoreEnabled(false);
+//        lrv.setPullRefreshEnabled(false);
         //设置底部加载颜色
         lrv.setFooterViewColor(R.color.color_blue, R.color.text_gray, R.color.elegant_bg);
         lrv.setHeaderViewColor(R.color.color_blue, R.color.text_gray, R.color.elegant_bg);
         lrv.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                getFirstPageData();
+                getFirstPageData();
             }
         });
         lrv.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-//                isLoadMore = true;
-//                currentPage++;
-//                getOrderList();
+                isLoadMore = true;
+                currentPage++;
+                getOrderList();
             }
         });
-
+        lrv.forceToRefresh();
     }
 
-    private void setSweetDialog(final int type,final String name,final String time, String title, String tip){
+    private void setSweetDialog(final StudentDetails item, String title, String tip){
         SweetAlertDialog sad = new SweetAlertDialog(UserActivity.this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText(title)
                 .setContentText(tip)
@@ -202,35 +261,36 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         sDialog.dismiss();
-                        UserDetails details = null;
-                        if(type == 1){//签到
-                            details = userDetailsDt.findByName$Time$Flag(name,time,1);
-                            int money = details.getMoney();
-                            int count = details.getCount();
-                            userReview.setLast_money(userReview.getLast_money() + money);
-                            userReview.setLast_count(userReview.getLast_count() + count);
-                        }else if(type == 2){//充值
-                            details = userDetailsDt.findByName$Time$Flag(name,time,2);
-                            int money = details.getMoney();
-                            int count = details.getCount();
-                            userReview.setTotal_money(userReview.getTotal_money() - money);
-                            userReview.setLast_money(userReview.getLast_money() - money);
-                            userReview.setTotal_count(userReview.getTotal_count() - count);
-                            userReview.setLast_count(userReview.getLast_count() - count);
+                        if(item.getFlag() == 1){//签到
+                            int money = item.getMoney();
+                            int count = item.getCount();
+                            student.setLastMoney(student.getLastMoney() + money);
+                            student.setLastCount(student.getLastCount() + count);
+                        }else if(item.getFlag() == 2){//充值
+                            int money = item.getMoney();
+                            int count = item.getCount();
+                            student.setTotalMoney(student.getTotalMoney() - money);
+                            student.setLastMoney(student.getLastMoney() - money);
+                            student.setTotalCount(student.getTotalCount() - count);
+                            student.setLastCount(student.getLastCount() - count);
                         }
-
                         //学员概述
-                        userReviewDt.update(userReview);
+                        student.saveInBackground();
                         //历史记录
-                        userDetailsDt.delete(details);
+                        item.deleteInBackground(new DeleteCallback() {
+                            @Override
+                            public void done(AVException e) {
+                                if(e == null){
+                                    //通知MainActivity刷新页面
+                                    BaseEvent event = new BaseEvent();
+                                    event.setCode(4);
+                                    EventBus.getDefault().post(event);
 
-                        //通知MainActivity刷新页面
-                        BaseEvent event = new BaseEvent();
-                        event.setCode(4);
-                        EventBus.getDefault().post(event);
-
-                        initData();
-                        mLRecyclerViewAdapter.notifyDataSetChanged();
+                                    setData();
+                                    getForceToRefresh();
+                                }
+                            }
+                        });
                     }
                 });
         sad.show();
@@ -244,42 +304,51 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
                 break;
             case R.id.recharge_btn:
                 if(dialogRecharge == null){
-                    dialogRecharge = new DialogRecharge(UserActivity.this,name);
+                    dialogRecharge = new DialogRecharge(UserActivity.this,student.getName());
                     dialogRecharge.setConfirmClickListener(new DialogRecharge.OnClickListener() {
                         @Override
-                        public void setConfirmClickListener(String time, String money, String count, String des) {
-                            UserDetails details = userDetailsDt.findByName$Time$Flag(name,time,2);//每天只能充值一次
-                            if(details == null){
-                                //生成当前充值记录，并插入数据库中
-                                details = new UserDetails();
-                                details.setName(name);
-                                details.setFlag(2);
-                                details.setTime(time);
-                                details.setMoney(Integer.parseInt(money));
-                                details.setCount(Integer.parseInt(count));
-                                details.setContent(des);
-                                userDetailsDt.insert(details);
+                        public void setConfirmClickListener(final String time, final String money, final String count, final String des) {
+                            final AVQuery<StudentDetails> details = AVObject.getQuery(StudentDetails.class);
+                            details.whereEqualTo(StudentDetails.OWNER, student);
+                            details.whereEqualTo(StudentDetails.TIME, time);
+                            details.whereEqualTo(StudentDetails.FLAG, 2);//每天只能充值一次
+                            getAVManager().setOnAVUtilListener(details, new AVUtil.OnAVUtilListener() {
+                                @Override
+                                public void onSuccess(List<AVObject> list) {
+                                    if(list == null || list.size() == 0){
+                                        //更新学员概述次数与金额等
+                                        student.setTotalCount(student.getTotalCount()+Integer.parseInt(count));
+                                        student.setLastCount(student.getLastCount()+Integer.parseInt(count));
+                                        student.setTotalMoney(student.getTotalMoney()+Integer.parseInt(money));
+                                        student.setLastMoney(student.getLastMoney()+Integer.parseInt(money));
+//                                        student.saveInBackground();
 
-                                //更新学员概述次数与金额等
-                                UserReview review = userReviewDt.findByName(name);
-                                review.setTotal_count(review.getTotal_count()+Integer.parseInt(count));
-                                review.setLast_count(review.getLast_count()+Integer.parseInt(count));
-                                review.setTotal_money(review.getTotal_money()+Integer.parseInt(money));
-                                review.setLast_money(review.getLast_money()+Integer.parseInt(money));
-                                userReviewDt.update(review);
 
-                                BaseEvent event = new BaseEvent();
-                                event.setCode(3);
-                                EventBus.getDefault().post(event);
+                                        //生成当前充值记录，并插入数据库中
+                                        StudentDetails studentDetails = new StudentDetails();
+                                        studentDetails.setName(student.getName());
+                                        studentDetails.setFlag(2);
+                                        studentDetails.setTime(time);
+                                        studentDetails.setMoney(Integer.parseInt(money));
+                                        studentDetails.setCount(Integer.parseInt(count));
+                                        studentDetails.setContent(des);
+                                        studentDetails.setOwner(student);
+                                        studentDetails.saveInBackground();
 
-                                initData();
-                                mLRecyclerViewAdapter.notifyDataSetChanged();
-                                dialogRecharge.dismiss();
 
-                                ToastUtil.showShortToast("充值成功！");
-                            }else{
-                                ToastUtil.showShortToast("每天只能充值一次哦！");
-                            }
+                                        BaseEvent event = new BaseEvent();
+                                        event.setCode(3);
+                                        EventBus.getDefault().post(event);
+
+                                        setData();
+                                        getForceToRefresh();
+                                        dialogRecharge.dismiss();
+                                        ToastUtil.showShortToast("充值成功！");
+                                    }else{
+                                        ToastUtil.showShortToast("每天只能充值一次哦！");
+                                    }
+                                }
+                            });
                         }
                     });
                 }
@@ -287,8 +356,9 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
                 break;
             case R.id.sign_btn:
                 startActivity(new Intent(UserActivity.this,SignActivity.class)
-                                .putExtra("name",name)
-                                .putExtra("state",1));
+                                .putExtra("name",student.getName())
+                                .putExtra("state",1)
+                                .putExtra("student", (Serializable) student));
                 break;
         }
     }
@@ -323,8 +393,8 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     public void onDataSynEvent(BaseEvent event) {
         int code = event.getCode();
         if (code == 1 || code == 2) {//1签到  2签到修改
-            initData();
-            mLRecyclerViewAdapter.notifyDataSetChanged();
+            setData();
+            getForceToRefresh();
         }
     }
 }

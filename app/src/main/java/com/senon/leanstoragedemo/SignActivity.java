@@ -9,6 +9,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.AVQuery;
+import com.avos.avoscloud.SaveCallback;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.senon.leanstoragedemo.adapter.RecycleHolder;
@@ -17,20 +22,19 @@ import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.base.BasePresenter;
 import com.senon.leanstoragedemo.base.BaseView;
 import com.senon.leanstoragedemo.entity.ClassLevel;
-import com.senon.leanstoragedemo.greendaoentity.UserDetails;
-import com.senon.leanstoragedemo.greendaoentity.UserReview;
-import com.senon.leanstoragedemo.greendaoutil.UserDetailsDt;
-import com.senon.leanstoragedemo.greendaoutil.UserReviewDt;
+import com.senon.leanstoragedemo.entity.Student;
+import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.util.AppConfig;
 import com.senon.leanstoragedemo.util.BaseEvent;
 import com.senon.leanstoragedemo.util.SelectorTimeUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -57,12 +61,11 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     private List<ClassLevel> levels;
     private RecyclerAdapter<ClassLevel> adapter;
     private LRecyclerViewAdapter mLRecyclerViewAdapter;
-    private UserDetailsDt userDetailsDt = new UserDetailsDt();//学员详细信息操作类
-    private UserReviewDt userReviewDt = new UserReviewDt();//学员概述操作类
     private String name;//当前学员名字
-    private String time;//当前日期
     private int state;//以什么状态进入该页面  0查询   1新增   2修改
-    private UserDetails userDetails;
+    private StudentDetails details;
+    private Student student;
+
 
     @Override
     public int getLayoutId() {
@@ -72,7 +75,8 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     @Override
     public void init() {
         name = getIntent().getStringExtra("name");
-        time = getIntent().getStringExtra("time");
+        details = (StudentDetails) getIntent().getSerializableExtra("details");
+        student = (Student) getIntent().getSerializableExtra("student");
         state = getIntent().getIntExtra("state",0);
 
         initState();
@@ -100,11 +104,10 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     }
 
     private void initData(){
-        userDetails = userDetailsDt.findByName$Time$Flag(name,time,1);
-        time_tv.setText(userDetails.getTime());
-        content_edt.setText(userDetails.getContent());
-        comments_edt.setText(userDetails.getComments());
-        levels.get(userDetails.getLevel()-1).setCheck(true);
+        time_tv.setText(details.getTime());
+        content_edt.setText(details.getContent());
+        comments_edt.setText(details.getComments());
+        levels.get(details.getLevel()-1).setCheck(true);
         content_edt.setSelection(content_edt.getText().toString().length());
 
     }
@@ -167,7 +170,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                     saveBitmap();
                     return;
                 }
-                String time = time_tv.getText().toString().trim();
+                final String time = time_tv.getText().toString().trim();
                 int level = 1;
                 String content = content_edt.getText().toString().trim();
                 String comments = comments_edt.getText().toString().trim();
@@ -193,42 +196,56 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 }
 
                 if(state == 1){//新增
-                    UserDetails details = new UserDetails();
-                    details.setName(name);
+                    final StudentDetails stde = new StudentDetails();
+                    stde.setName(name);
+                    stde.setTime(time);
+                    stde.setMoney(AppConfig.PRICE);
+                    stde.setCount(1);
+                    stde.setFlag(1);
+                    stde.setLevel(level);
+                    stde.setContent(content);
+                    stde.setComments(comments);
+                    stde.setOwner(student);
+
+                    AVQuery<StudentDetails> query = AVQuery.getQuery(StudentDetails.class);
+                    query.whereEqualTo(StudentDetails.NAME,student.getName());
+                    query.whereEqualTo(StudentDetails.TIME,time);
+                    query.whereEqualTo(StudentDetails.FLAG,1);
+                    getAVManager().setOnAVUtilListener(query, true, new AVUtil.OnAVUtilListener() {
+                        @Override
+                        public void onSuccess(List<AVObject> list) {
+                            if(list == null || list.size() == 0){
+                                //减少学员概述中的剩余次数
+                                student.setSignTime(time);
+                                student.setLastCount(student.getLastCount() - 1);
+                                student.setLastMoney(student.getLastMoney() - AppConfig.PRICE);
+
+                                //学员签到历史记录增加
+                                stde.saveInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(AVException e) {
+                                        if(e == null){
+                                            BaseEvent event = new BaseEvent();
+                                            event.setCode(1);
+                                            EventBus.getDefault().post(event);
+
+                                            ToastUtil.showShortToast("签到成功！");
+                                            finish();
+                                        }
+                                    }
+                                });
+
+                            }else{
+                                ToastUtil.showShortToast("当天已经签过到啦");
+                            }
+                        }
+                    });
+                }else if(state == 2){//修改
                     details.setTime(time);
-                    details.setMoney(AppConfig.PRICE);
-                    details.setCount(1);
-                    details.setFlag(1);
                     details.setLevel(level);
                     details.setContent(content);
                     details.setComments(comments);
-                    if(userDetailsDt.findByName$Time$Flag(name,time,1) != null){
-                        ToastUtil.showShortToast("当天已经签过到啦");
-                    }else{
-                        //减少学员概述中的剩余次数
-                        UserReview userReview = userReviewDt.findByName(name);
-                        userReview.setSignTime(time);
-                        userReview.setLast_count(userReview.getLast_count()-1);
-                        userReview.setLast_money(userReview.getLast_money() - AppConfig.PRICE);
-                        userReviewDt.update(userReview);
-
-                        //学员签到历史记录增加
-                        userDetailsDt.insert(details);
-                        ToastUtil.showShortToast("签到成功");
-
-                        BaseEvent event = new BaseEvent();
-                        event.setCode(1);
-                        EventBus.getDefault().post(event);
-
-                        finish();
-                    }
-                }else if(state == 2){//修改
-                    userDetails.setTime(time);
-                    userDetails.setLevel(level);
-                    userDetails.setContent(content);
-                    userDetails.setComments(comments);
-
-                    userDetailsDt.update(userDetails);
+                    details.saveInBackground();
                     ToastUtil.showShortToast("签到修改成功");
 
                     BaseEvent event = new BaseEvent();
