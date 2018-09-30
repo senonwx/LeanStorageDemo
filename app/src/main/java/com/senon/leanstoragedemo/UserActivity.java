@@ -59,7 +59,7 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
-    private int pageLimit = 4;//每页条数
+    private int pageLimit = 8;//每页条数
     private List<AVObject> mData = new ArrayList<>();//原始数据
     private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogRecharge dialogRecharge;

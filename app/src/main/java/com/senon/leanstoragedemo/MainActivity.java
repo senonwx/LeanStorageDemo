@@ -3,8 +3,11 @@ package com.senon.leanstoragedemo;
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
+
+import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
+import com.avos.avoscloud.SaveCallback;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
@@ -16,6 +19,7 @@ import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.base.BaseResponse;
 import com.senon.leanstoragedemo.contract.MainContract;
 import com.senon.leanstoragedemo.entity.Student;
+import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.presenter.MainPresenter;
 import com.senon.leanstoragedemo.util.BaseEvent;
 import com.senon.leanstoragedemo.util.ToastUtil;
@@ -123,6 +127,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
 
     private void getOrderList() {
         AVQuery<Student> student = AVObject.getQuery(Student.class);
+        student.orderByAscending("createdAt");//按照创建时间升序排列
         student.limit(pageLimit);// 最多返回 10 条结果
         student.skip(currentPage * pageLimit);// 跳过 10 * 当前页数 条结果
         getAVManager().setOnAVUtilListener(student, new AVUtil.OnAVUtilListener() {
@@ -176,9 +181,13 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                                 if (list == null || list.size() == 0) {
                                     Student stu = new Student();
                                     stu.put(Student.NAME,name);
-                                    stu.saveInBackground();
+                                    stu.saveInBackground(new SaveCallback() {
+                                        @Override
+                                        public void done(AVException e) {
+                                            getForceToRefresh();
+                                        }
+                                    });
 
-                                    getForceToRefresh();
                                 } else {
                                     ToastUtil.showShortToast("姓名重复，请重新输入！");
                                 }
@@ -220,7 +229,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         sDialog.dismiss();
-                        AVQuery<AVObject> student = new AVQuery<>("Student");
+                        AVQuery<Student> student = AVQuery.getQuery(Student.class);
                         student.whereEqualTo(Student.NAME, name);
                         getAVManager().setOnAVUtilListener(student,true,new AVUtil.OnAVUtilListener() {
                             @Override
@@ -228,11 +237,33 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
                                 if(list == null || list.size() == 0){
                                     ToastUtil.showShortToast("姓名输入错误，未找到学员！");
                                 }else{
+                                    //删除学员详细的信息列表
+                                    AVQuery<StudentDetails> details = AVQuery.getQuery(StudentDetails.class);
+                                    details.whereEqualTo(StudentDetails.OWNER, list.get(0));
+                                    getAVManager().setOnAVUtilListener(details,true,new AVUtil.OnAVUtilListener() {
+                                        @Override
+                                        public void onSuccess(List<AVObject> list) {
+                                            if(list == null || list.size() == 0){
+//                                                ToastUtil.showShortToast("姓名输入错误，未找到学员！");
+                                            }else{
+                                                //循环删除学员详细的信息
+                                                for (AVObject city : list) {
+                                                    city.deleteInBackground();
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    //删除学员表信息
                                     (list.get(0)).deleteInBackground();
                                     getForceToRefresh();
                                 }
                             }
                         });
+
+
+
+
                     }
                 });
         sad.show();
