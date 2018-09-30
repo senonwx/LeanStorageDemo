@@ -56,6 +56,8 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     EditText content_edt;
     @BindView(R.id.comments_edt)
     EditText comments_edt;
+    @BindView(R.id.homework_edt)
+    EditText homework_edt;
     @BindView(R.id.time_lay)
     RelativeLayout time_lay;
     private List<ClassLevel> levels;
@@ -107,6 +109,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
         time_tv.setText(details.getTime());
         content_edt.setText(details.getContent());
         comments_edt.setText(details.getComments());
+        homework_edt.setText(details.getHomework());
         levels.get(details.getLevel()-1).setCheck(true);
         content_edt.setSelection(content_edt.getText().toString().length());
 
@@ -116,6 +119,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
         time_lay.setEnabled(enable);
         content_edt.setEnabled(enable);
         comments_edt.setEnabled(enable);
+        homework_edt.setEnabled(enable);
     }
 
     //初始化类型Recyclerview
@@ -174,6 +178,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 int level = 1;
                 String content = content_edt.getText().toString().trim();
                 String comments = comments_edt.getText().toString().trim();
+                String homework = homework_edt.getText().toString().trim();
                 if(time.isEmpty()){
                     ToastUtil.showShortToast("请选择签到时间");
                     return;
@@ -205,6 +210,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                     stde.setLevel(level);
                     stde.setContent(content);
                     stde.setComments(comments);
+                    stde.setHomework(homework);
                     stde.setOwner(student);
 
                     AVQuery<StudentDetails> query = AVQuery.getQuery(StudentDetails.class);
@@ -245,6 +251,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                     details.setLevel(level);
                     details.setContent(content);
                     details.setComments(comments);
+                    details.setHomework(homework);
                     details.saveInBackground();
                     ToastUtil.showShortToast("签到修改成功");
 

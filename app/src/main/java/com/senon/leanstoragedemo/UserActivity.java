@@ -59,7 +59,7 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
-    private int pageLimit = 10;//每页条数
+    private int pageLimit = 4;//每页条数
     private List<AVObject> mData = new ArrayList<>();//原始数据
     private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogRecharge dialogRecharge;
@@ -83,6 +83,7 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
     private void getOrderList() {
         AVQuery<StudentDetails> details = AVObject.getQuery(StudentDetails.class);
         details.whereEqualTo(StudentDetails.OWNER, student);
+        details.addDescendingOrder("createdAt");//按照创建时间降序排列
         details.limit(pageLimit);// 最多返回 10 条结果
         details.skip(currentPage * pageLimit);// 跳过 10 * 当前页数 条结果
         getAVManager().setOnAVUtilListener(details, new AVUtil.OnAVUtilListener() {

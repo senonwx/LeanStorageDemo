@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_marginBottom="10dp"
     android:background="@color/subscribe_item_drag_bg"
-    tools:context="com.example.senon.nancyclass.SignActivity">
+    >
 
     <RelativeLayout
         android:id="@+id/layout1"
@@ -159,7 +159,7 @@
             android:layout_marginRight="20dp"
             android:background="@drawable/edit_bg"
             android:layout_toRightOf="@+id/textview3"
-            android:minHeight="100dp"
+            android:minHeight="80dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </RelativeLayout>
@@ -205,7 +205,53 @@
             android:layout_marginRight="20dp"
             android:background="@drawable/edit_bg"
             android:layout_toRightOf="@+id/textview4"
-            android:minHeight="150dp"
+            android:minHeight="100dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/empty4"
+        android:layout_below="@+id/comments_lay"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@color/txt_gray_color"/>
+
+    <RelativeLayout
+        android:layout_below="@+id/empty4"
+        android:id="@+id/homework_lay"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/textview5"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
+            android:gravity="center"
+            android:text="课后作业:"
+            android:textColor="@color/person_system_gray_tv"
+            android:textSize="16sp"/>
+        <EditText
+            android:lineSpacingMultiplier="1.1"
+            android:id="@+id/homework_edt"
+            android:textColor="@color/elegant_dialog_description_tv"
+            android:textSize="17dp"
+            android:gravity="start"
+            android:text=""
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="14dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/edit_bg"
+            android:layout_toRightOf="@+id/textview5"
+            android:minHeight="80dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </RelativeLayout>
