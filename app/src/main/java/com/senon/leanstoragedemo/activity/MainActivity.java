@@ -26,6 +26,7 @@ import com.senon.leanstoragedemo.entity.Student;
 import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.presenter.MainPresenter;
 import com.senon.leanstoragedemo.util.BaseEvent;
+import com.senon.leanstoragedemo.util.DownloadUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -55,7 +56,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogAdd$Del dialogAdd$Del;
     private long mExitTime;//点击退出时间差
-
+    private DownloadUtil downloadUtil;
 
     @Override
     public int getLayoutId() {
@@ -67,6 +68,9 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
         EventBus.getDefault().register(this);
 
         initLrv();
+
+        downloadUtil = new DownloadUtil(this,false);
+        downloadUtil.checkVersion();
     }
 
     private void initLrv() {

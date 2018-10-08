@@ -65,4 +65,13 @@
         <!-- 显示对话框时当前的屏幕是否变暗 -->
         <item name="android:backgroundDimEnabled">true</item>
     </style>
+
+    <style name="BaseDialog" parent="android:Theme.Light">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
 </resources>

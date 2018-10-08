@@ -6,6 +6,8 @@ import com.avos.avoscloud.AVQuery;
 import com.senon.leanstoragedemo.contract.LoginContract;
 import com.senon.leanstoragedemo.entity.Login;
 import com.senon.leanstoragedemo.util.AVUtil;
+import com.senon.leanstoragedemo.util.ToastUtil;
+
 import java.util.List;
 
 
@@ -26,7 +28,11 @@ public class LoginPresenter extends LoginContract.Presenter{
         avUtil.setOnAVUtilListener(account,isDialog, new AVUtil.OnAVUtilListener() {
             @Override
             public void onSuccess(List<AVObject> list) {
-                getView().result(list,isAutoLogin);
+                if(list == null || list.size() == 0){
+                    ToastUtil.showLongToast("请求错误！");
+                }else{
+                    getView().result(list,isAutoLogin);
+                }
             }
         });
     }
