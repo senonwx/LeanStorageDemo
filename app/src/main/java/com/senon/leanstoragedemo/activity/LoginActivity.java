@@ -18,9 +18,8 @@ import butterknife.OnClick;
 
 
 /**
- * 忘记密码页面
+ * 登录页面
  */
-
 public class LoginActivity extends BaseActivity<LoginContract.View, LoginContract.Presenter>
         implements LoginContract.View{
 
