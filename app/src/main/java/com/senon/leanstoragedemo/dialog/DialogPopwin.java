@@ -1,4 +1,4 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
 
+import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.adapter.CommonAdapter;
 import com.senon.leanstoragedemo.adapter.ViewHolder;
 

@@ -1,4 +1,4 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.activity;
 
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +14,10 @@ import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.github.jdsjlzx.recyclerview.ProgressStyle;
+import com.senon.leanstoragedemo.util.AVUtil;
+import com.senon.leanstoragedemo.dialog.DialogPopwin;
+import com.senon.leanstoragedemo.dialog.DialogRecharge;
+import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.adapter.RecycleHolder;
 import com.senon.leanstoragedemo.adapter.RecyclerAdapter;
 import com.senon.leanstoragedemo.base.BaseActivity;

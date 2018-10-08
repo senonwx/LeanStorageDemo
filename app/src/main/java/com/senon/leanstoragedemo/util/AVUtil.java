@@ -1,4 +1,4 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.util;
 
 import android.content.Context;
 import android.widget.Toast;
@@ -15,7 +15,7 @@ import java.util.List;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
- * Created by Administrator on 2018/9/28.
+ * 查询公共类
  */
 public class AVUtil<T extends AVQuery<AVObject>>{
 

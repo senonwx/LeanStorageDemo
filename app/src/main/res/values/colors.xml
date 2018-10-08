@@ -131,6 +131,8 @@
 
     <color name="smile_bg">#bfbfbf</color>
     <color name="smile_yellow">#ea9161</color>
+    <color name="login_line_gray">#d7d7d7</color>
+    <color name="login_red">#FF2A17</color>
 
 
 </resources>

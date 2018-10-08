@@ -5,6 +5,7 @@ import android.content.Context;
 import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.AVObject;
 import com.senon.leanstoragedemo.Config;
+import com.senon.leanstoragedemo.entity.Login;
 import com.senon.leanstoragedemo.entity.Student;
 import com.senon.leanstoragedemo.entity.StudentDetails;
 
@@ -22,6 +23,7 @@ public class BaseApplication extends Application{
         //    AVOSCloud.setNetworkTimeout(20 * 1000);
         AVObject.registerSubclass(Student.class);
         AVObject.registerSubclass(StudentDetails.class);
+        AVObject.registerSubclass(Login.class);
         AVOSCloud.setDebugLogEnabled(true);
 
         AVOSCloud.initialize(getContext(), Config.APP_ID, Config.APP_KEY);

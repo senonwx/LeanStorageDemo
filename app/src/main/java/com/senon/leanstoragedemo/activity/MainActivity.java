@@ -1,7 +1,8 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.activity;
 
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.KeyEvent;
 import android.view.View;
 
 import com.avos.avoscloud.AVException;
@@ -13,6 +14,9 @@ import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.github.jdsjlzx.recyclerview.ProgressStyle;
+import com.senon.leanstoragedemo.util.AVUtil;
+import com.senon.leanstoragedemo.dialog.DialogAdd$Del;
+import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.adapter.RecycleHolder;
 import com.senon.leanstoragedemo.adapter.RecyclerAdapter;
 import com.senon.leanstoragedemo.base.BaseActivity;
@@ -50,6 +54,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     private List<AVObject> mData = new ArrayList<>();//原始数据
     private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogAdd$Del dialogAdd$Del;
+    private long mExitTime;//点击退出时间差
 
 
     @Override
@@ -300,5 +305,25 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
         if (code == 1 || code == 2 || code == 3 || code == 4) {//1签到  2签到修改 3充值  4删除了历史记录
             getForceToRefresh();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //判断用户是否点击了“返回键”
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //与上次点击返回键时刻作差
+            if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                //大于2000ms则认为是误操作，使用Toast进行提示
+                ToastUtil.showShortToast("再按一次返回键退出");
+                //并记录下本次点击“返回键”的时刻，以便下次  进行判断
+                mExitTime = System.currentTimeMillis();
+            } else {
+                //小于2000ms则认为是用户确实希望退出程序-调用System.exit()方法进行退出
+                finish();
+//                    moveTaskToBack(false);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

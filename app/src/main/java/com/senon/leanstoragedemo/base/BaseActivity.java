@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.avos.avoscloud.AVObject;
-import com.senon.leanstoragedemo.AVUtil;
+import com.senon.leanstoragedemo.util.AVUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;

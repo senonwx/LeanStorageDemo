@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="115dp"
+            android:layout_height="91dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="85dp"
+            android:src="@drawable/icon_new" />
+
+        <LinearLayout
+            android:layout_marginTop="230dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginRight="35dp"
+                >
+
+                <TextView
+                    android:id="@+id/text1"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="18dp"
+                    android:text="帐号"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:layout_below="@+id/text1"
+                    android:hint="请输入管理员帐号"
+                    android:maxLength="10"
+                    android:id="@+id/account"
+                    android:background="@null"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:textColor="@color/elegant_publish_title"
+                    android:textColorHint="@color/elegant_dialog_time_tv"
+                    android:textSize="16dp" />
+                <TextView
+                    android:layout_below="@+id/account"
+                    android:background="@color/login_line_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginRight="35dp"
+                >
+
+                <TextView
+                    android:id="@+id/text2"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="18dp"
+                    android:text="密码"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:layout_below="@+id/text2"
+                    android:hint="请输入管理员密码"
+                    android:maxLength="18"
+                    android:id="@+id/pwd"
+                    android:background="@null"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:textColor="@color/elegant_publish_title"
+                    android:textColorHint="@color/elegant_dialog_time_tv"
+                    android:textSize="16dp" />
+                <TextView
+                    android:layout_below="@+id/pwd"
+                    android:background="@color/login_line_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/login_lay_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginRight="35dp"
+                android:layout_marginTop="45dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/login_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/register_border_red_new"
+                    android:text="登录"
+                    android:textColor="@color/login_red"
+                    android:textSize="18dp" />
+
+                <Button
+                    android:visibility="gone"
+                    android:id="@+id/register_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="26dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/register_border_red_new"
+                    android:text="注册"
+                    android:textColor="@color/login_red"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

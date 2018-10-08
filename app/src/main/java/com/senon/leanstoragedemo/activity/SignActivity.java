@@ -1,4 +1,4 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.activity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +16,8 @@ import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.SaveCallback;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
+import com.senon.leanstoragedemo.util.AVUtil;
+import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.adapter.RecycleHolder;
 import com.senon.leanstoragedemo.adapter.RecyclerAdapter;
 import com.senon.leanstoragedemo.base.BaseActivity;
@@ -33,8 +35,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
