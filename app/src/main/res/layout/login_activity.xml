@@ -40,6 +40,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <EditText
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
                     android:layout_below="@+id/text1"
                     android:hint="请输入管理员帐号"
                     android:maxLength="10"
@@ -74,6 +76,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <EditText
+                    android:singleLine="true"
+                    android:imeOptions="actionDone"
                     android:layout_below="@+id/text2"
                     android:hint="请输入管理员密码"
                     android:maxLength="18"
