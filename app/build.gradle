@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'senon'
+            keyPassword '123456'
+            storeFile file('./senon.jks')
+            storePassword '123456'
+        }
+    }
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.senon.leanstoragedemo"
@@ -9,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.config
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -18,8 +27,14 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled false//开闭混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 
@@ -38,7 +53,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.5.1' //组件视图绑定依赖
     compile 'com.jakewharton:butterknife-compiler:8.5.1'//组件视图绑定依赖
     compile 'com.android.support:design:26.1.0'//Material Design
-    compile 'com.github.zhaokaiqiang.klog:library:1.5.0'//Klog日志打印
+    compile 'com.github.zhaokaiqiang.klog:library:1.6.0'//Klog日志打印
     implementation 'com.github.jdsjlzx:LRecyclerView:1.5.0'//带下拉刷新的列表控件
     implementation 'com.github.f0ris.sweetalert:library:1.5.1'
 
