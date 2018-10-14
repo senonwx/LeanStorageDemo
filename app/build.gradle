@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.mob.sdk'
 
 android {
     signingConfigs {
@@ -12,7 +13,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.senon.leanstoragedemo"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -40,6 +41,31 @@ android {
 
 }
 
+MobSDK {
+    appKey "283be68995993"
+    appSecret "003bde4abe393b49c6653a7bb2b24d4c"
+    ShareSDK {
+        devInfo {
+            Wechat {
+                appId "wx4868b35061f87885"
+                appSecret "64020361b8ec4c99936c0e3999a9f249"
+                bypassApproval true
+            }
+            QQ {
+                appId "100371282"
+                appKey "aed9b0303e3ed1e27bae87c33761161d"
+                bypassApproval true
+            }
+//            SinaWeibo {
+//                appKey "568898243"
+//                appSecret "38a4f8204cc784f81f9f0daaf31e02e3"
+//                callbackUri "http://www.sharesdk.cn"
+//                shareByAppClient true
+//            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:26.1.0'
@@ -59,5 +85,10 @@ dependencies {
 
     implementation 'org.greenrobot:eventbus:3.1.1'
     compile 'com.allenliu.versionchecklib:library:2.0.5'//检测版本更新
+    compile 'pub.devrel:easypermissions:0.2.0'//权限申请
+
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'//微信分享
+
+
 
 }

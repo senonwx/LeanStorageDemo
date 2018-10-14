@@ -1,8 +1,11 @@
 package com.senon.leanstoragedemo.activity;
 
+import android.Manifest;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.View;
@@ -29,6 +32,7 @@ import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.util.AppConfig;
 import com.senon.leanstoragedemo.util.BaseEvent;
 import com.senon.leanstoragedemo.util.SelectorTimeUtil;
+import com.senon.leanstoragedemo.util.ShareUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
 import org.greenrobot.eventbus.EventBus;
 import java.io.ByteArrayOutputStream;
@@ -38,6 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * 学员签到页面
@@ -90,7 +95,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
 
         if(state == 0){
             name_tv.setText(name+"的签到");
-            commit_tv.setText("截屏");
+            commit_tv.setText("分享");
 
             initData();
             setEnable(false);
@@ -171,7 +176,9 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 break;
             case R.id.commit_tv:
                 if(state == 0){
-                    saveBitmap();
+                    requestPermission(this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            "需要访问手机内存权限？");
                     return;
                 }
                 final String time = time_tv.getText().toString().trim();
@@ -269,6 +276,26 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
         }
     }
 
+    public void requestPermission(Context context, String[] mPermissionList, String msg) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            //读取sd卡的权限
+            if (EasyPermissions.hasPermissions(context, mPermissionList)) {
+                //已经同意过
+                saveBitmap();
+            } else {
+                //未同意过,或者说是拒绝了，再次申请权限
+                EasyPermissions.requestPermissions(
+                        context,  //上下文
+                        msg, //提示文言
+                        1000, //请求码
+                        mPermissionList //权限列表
+                );
+            }
+        } else {
+            saveBitmap();
+        }
+    }
+
     private void saveBitmap(){
         // 获取屏幕
         View dView = getWindow().getDecorView();
@@ -286,7 +313,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
         while (true) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
             if (baos.toByteArray().length / 1024 > 512) {
-                quality -= 10;
+                quality -= 5;
             } else {
                 break;
             }
@@ -302,22 +329,29 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
             // 获取内置SD卡路径
             String sdCardPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath();
             // 图片文件路径
-            String filePath = sdCardPath + "/" +System.currentTimeMillis()+name+".jpg";
+            String filePath = sdCardPath + File.separator + "Camera"+ File.separator + System.currentTimeMillis()+name+".jpg";
             File file = new File(filePath);
             judeDirExists(file);
             FileOutputStream os = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.PNG, 100, os);
             os.flush();
             os.close();
-            ToastUtil.showShortToast("截屏成功，在相册中可以查看！");
+            ToastUtil.showShortToast("截屏图片保存成功，可在相册中查看！");
             //刷新系统相册
             MediaScannerConnection.scanFile(this, new String[]{
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/" + filePath},
                     null, null);
+
+            shareToTarget(filePath);
         } catch (Exception e) {
-            ToastUtil.showShortToast("截屏失败，请重试！");
+            ToastUtil.showShortToast("分享失败，请稍后重试！");
         }
     }
+
+    private void shareToTarget(String filePath) {
+        ShareUtil.showShare(this,name,filePath);
+    }
+
     // 判断文件是否存在
     public void judeDirExists(File file) {
         if (file.exists()) {
@@ -329,4 +363,5 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
             }
         }
     }
+
 }

@@ -10,7 +10,7 @@ import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.contract.LoginContract;
 import com.senon.leanstoragedemo.presenter.LoginPresenter;
-import com.senon.leanstoragedemo.util.ShareUtil;
+import com.senon.leanstoragedemo.util.SPUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
 import java.util.List;
 import butterknife.BindView;
@@ -48,8 +48,8 @@ public class LoginActivity extends BaseActivity<LoginContract.View, LoginContrac
 
     @Override
     public void init() {
-        String account = ShareUtil.getLoginAccount();
-        String password = ShareUtil.getLoginPassword();
+        String account = SPUtil.getLoginAccount();
+        String password = SPUtil.getLoginPassword();
         if(!account.isEmpty() && !password.isEmpty()){
             getPresenter().login(account,password, true, true);
         }
@@ -59,8 +59,8 @@ public class LoginActivity extends BaseActivity<LoginContract.View, LoginContrac
     public void result(List<AVObject>  data,boolean isAutoLogin) {
         if(data != null && data.size() != 0){
             if(!isAutoLogin){
-                ShareUtil.setLoginAccount(account.getText().toString());
-                ShareUtil.setLoginPassword(pwd.getText().toString());
+                SPUtil.setLoginAccount(account.getText().toString());
+                SPUtil.setLoginPassword(pwd.getText().toString());
             }else{
                 setMsg("自动登录成功！");
             }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.AVObject;
+import com.mob.MobSDK;
 import com.senon.leanstoragedemo.Config;
 import com.senon.leanstoragedemo.entity.DownloadAPK;
 import com.senon.leanstoragedemo.entity.Login;
@@ -21,7 +22,15 @@ public class BaseApplication extends Application{
 
         mContext = getApplicationContext();
 
-        //    AVOSCloud.setNetworkTimeout(20 * 1000);
+        //初始化shareSdk
+        MobSDK.init(this);
+
+        //初始化AVOSCloud
+        initAVOSCloud();
+    }
+
+    private void initAVOSCloud(){
+        //AVOSCloud.setNetworkTimeout(20 * 1000);
         AVObject.registerSubclass(Student.class);
         AVObject.registerSubclass(StudentDetails.class);
         AVObject.registerSubclass(Login.class);

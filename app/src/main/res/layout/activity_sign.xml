@@ -143,6 +143,7 @@
             android:textColor="@color/person_system_gray_tv"
             android:textSize="16sp"/>
         <EditText
+            android:imeOptions="actionNext"
             android:lineSpacingMultiplier="1.1"
             android:id="@+id/content_edt"
             android:textColor="@color/elegant_dialog_description_tv"
@@ -189,6 +190,7 @@
             android:textColor="@color/person_system_gray_tv"
             android:textSize="16sp"/>
         <EditText
+            android:imeOptions="actionNext"
             android:lineSpacingMultiplier="1.1"
             android:id="@+id/comments_edt"
             android:textColor="@color/elegant_dialog_description_tv"
@@ -235,6 +237,7 @@
             android:textColor="@color/person_system_gray_tv"
             android:textSize="16sp"/>
         <EditText
+            android:imeOptions="actionDone"
             android:lineSpacingMultiplier="1.1"
             android:id="@+id/homework_edt"
             android:textColor="@color/elegant_dialog_description_tv"

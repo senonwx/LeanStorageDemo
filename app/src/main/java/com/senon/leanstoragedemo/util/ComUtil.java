@@ -1,8 +1,12 @@
 package com.senon.leanstoragedemo.util;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.util.DisplayMetrics;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * 公共util
@@ -38,4 +42,6 @@ public class ComUtil {
                 return "很好";
         }
     }
+
+
 }
