@@ -72,7 +72,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     private int state;//以什么状态进入该页面  0查询   1新增   2修改
     private StudentDetails details;
     private Student student;
-
+    private boolean isDownloadShare = false;
 
     @Override
     public int getLayoutId() {
@@ -88,6 +88,16 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
 
         initState();
         initLevelLrv();
+        commit_tv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                isDownloadShare = true;
+                requestPermission(SignActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        "需要访问手机内存权限？");
+                return false;
+            }
+        });
     }
 
     private void initState() {
@@ -176,6 +186,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 break;
             case R.id.commit_tv:
                 if(state == 0){
+                    isDownloadShare = false;
                     requestPermission(this,
                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                             "需要访问手机内存权限？");
@@ -349,7 +360,11 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     }
 
     private void shareToTarget(String filePath) {
-        ShareUtil.showShare(this,name,filePath);
+        if(isDownloadShare){
+            ShareUtil.downloadShare(this,filePath);
+        }else{
+            ShareUtil.showShare(this,name,filePath);
+        }
     }
 
     // 判断文件是否存在

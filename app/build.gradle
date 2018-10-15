@@ -15,8 +15,8 @@ android {
         applicationId "com.senon.leanstoragedemo"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
 
@@ -47,13 +47,29 @@ MobSDK {
     ShareSDK {
         devInfo {
             Wechat {
-                appId "wx4868b35061f87885"
-                appSecret "64020361b8ec4c99936c0e3999a9f249"
-                bypassApproval true
+//                appId "wx4868b35061f87885"
+//                appSecret "64020361b8ec4c99936c0e3999a9f249"//测试用的 美的厨房 app水印
+                sortId 1
+                appId "wx816ef19d892e9e96"
+                appSecret "201482955cc5a88250174c959d06f9d4"
+                bypassApproval false//是否绕过审核  默认为false  也就是分享出去 是否显示应用信息
+            }
+            WechatMoments {
+                sortId 2
+                AppId = "wx816ef19d892e9e96"
+                AppSecret = "201482955cc5a88250174c959d06f9d4"
+                BypassApproval = false
             }
             QQ {
+                sortId 3
                 appId "100371282"
-                appKey "aed9b0303e3ed1e27bae87c33761161d"
+                appKey "aed9b0303e3ed1e27bae87c33761161d"//测试用的 美的厨房 app水印
+                bypassApproval true
+            }
+            QZone {
+                sortId 4
+                AppId = "100371282"
+                AppKey = "aed9b0303e3ed1e27bae87c33761161d"
                 bypassApproval true
             }
 //            SinaWeibo {
@@ -88,7 +104,6 @@ dependencies {
     compile 'pub.devrel:easypermissions:0.2.0'//权限申请
 
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'//微信分享
-
 
 
 }

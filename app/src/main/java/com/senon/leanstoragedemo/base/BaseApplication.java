@@ -5,7 +5,7 @@ import android.content.Context;
 import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.AVObject;
 import com.mob.MobSDK;
-import com.senon.leanstoragedemo.Config;
+import com.senon.leanstoragedemo.util.AVCloudConfig;
 import com.senon.leanstoragedemo.entity.DownloadAPK;
 import com.senon.leanstoragedemo.entity.Login;
 import com.senon.leanstoragedemo.entity.Student;
@@ -37,7 +37,7 @@ public class BaseApplication extends Application{
         AVObject.registerSubclass(DownloadAPK.class);
         AVOSCloud.setDebugLogEnabled(true);
 
-        AVOSCloud.initialize(getContext(), Config.APP_ID, Config.APP_KEY);
+        AVOSCloud.initialize(getContext(), AVCloudConfig.APP_ID, AVCloudConfig.APP_KEY);
     }
 
     public static Context getContext(){

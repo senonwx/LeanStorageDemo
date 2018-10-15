@@ -1,9 +1,9 @@
-package com.senon.leanstoragedemo;
+package com.senon.leanstoragedemo.util;
 
 /**
- * Created by lzw on 14-8-24.
+ * AVCloud 参数配置
  */
-public class Config {
+public class AVCloudConfig {
 //  public static String APP_ID = "ohqhxu3mgoj2eyj6ed02yliytmbes3mwhha8ylnc215h0bgk";
 //  public static String APP_KEY = "6j8fuggqkbc5m86b8mp4pf2no170i5m7vmax5iypmi72wldc";
 

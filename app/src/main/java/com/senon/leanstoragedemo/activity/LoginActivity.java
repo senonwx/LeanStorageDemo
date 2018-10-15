@@ -10,6 +10,7 @@ import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.base.BaseActivity;
 import com.senon.leanstoragedemo.contract.LoginContract;
 import com.senon.leanstoragedemo.presenter.LoginPresenter;
+import com.senon.leanstoragedemo.util.DownloadUtil;
 import com.senon.leanstoragedemo.util.SPUtil;
 import com.senon.leanstoragedemo.util.ToastUtil;
 import java.util.List;
@@ -29,6 +30,7 @@ public class LoginActivity extends BaseActivity<LoginContract.View, LoginContrac
     EditText pwd;
     @BindView(R.id.login_btn)
     Button login_btn;
+    private DownloadUtil downloadUtil;
 
 
     @Override
@@ -52,6 +54,9 @@ public class LoginActivity extends BaseActivity<LoginContract.View, LoginContrac
         String password = SPUtil.getLoginPassword();
         if(!account.isEmpty() && !password.isEmpty()){
             getPresenter().login(account,password, true, true);
+        }else{//没有自动登录的情况 才检测更新
+            downloadUtil = new DownloadUtil(this,false);
+            downloadUtil.checkVersion();
         }
     }
 
