@@ -201,11 +201,13 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                     ToastUtil.showShortToast("请选择签到时间");
                     return;
                 }else if(content.isEmpty()){
-                    ToastUtil.showShortToast("请填写上课内容");
-                    return;
+//                    ToastUtil.showShortToast("请填写上课内容");
+//                    return;
+                    content = "1";
                 }else if(comments.isEmpty()){
-                    ToastUtil.showShortToast("请对学生该堂课表现进行评价");
-                    return;
+//                    ToastUtil.showShortToast("请对学生该堂课表现进行评价");
+//                    return;
+                    comments = "1";
                 }
                 for (int i = 0; i < levels.size(); i++) {
                     if(levels.get(i).isCheck()){
