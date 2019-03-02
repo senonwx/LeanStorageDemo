@@ -19,6 +19,7 @@ import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.SaveCallback;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
+import com.senon.leanstoragedemo.dialog.DialogSelectStu;
 import com.senon.leanstoragedemo.util.AVUtil;
 import com.senon.leanstoragedemo.R;
 import com.senon.leanstoragedemo.adapter.RecycleHolder;
@@ -39,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -53,6 +55,8 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     TextView name_tv;
     @BindView(R.id.commit_tv)
     TextView commit_tv;
+    @BindView(R.id.exchange_tv)
+    TextView exchange_tv;
     @BindView(R.id.time_tv)
     TextView time_tv;
     @BindView(R.id.level_lrv)
@@ -65,6 +69,12 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     EditText homework_edt;
     @BindView(R.id.time_lay)
     RelativeLayout time_lay;
+    @BindView(R.id.userlist_lay)
+    RelativeLayout userlist_lay;
+    @BindView(R.id.userlist_tv)
+    TextView userlist_tv;
+    @BindView(R.id.empty0)
+    View empty0;
     private List<ClassLevel> levels;
     private RecyclerAdapter<ClassLevel> adapter;
     private LRecyclerViewAdapter mLRecyclerViewAdapter;
@@ -73,6 +83,9 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     private StudentDetails details;
     private Student student;
     private boolean isDownloadShare = false;
+    private boolean isSingle = true;//是否是单人模式
+    private ArrayList<Student> students = new ArrayList<>();
+
 
     @Override
     public int getLayoutId() {
@@ -86,8 +99,12 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
         student = (Student) getIntent().getSerializableExtra("student");
         state = getIntent().getIntExtra("state",0);
 
+        exchange_tv.setVisibility(state == 1 ? View.VISIBLE:View.GONE);
+
+        isSingleMode();
         initState();
         initLevelLrv();
+
         commit_tv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -117,6 +134,21 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
             commit_tv.setText("修改");
             initData();
 
+        }
+
+    }
+
+    private void isSingleMode(){
+        if(state == 1){
+            if(isSingle){//是单人模式，不显示选择多人
+                userlist_lay.setVisibility(View.GONE);
+                empty0.setVisibility(View.GONE);
+                exchange_tv.setText("多人签到");
+            }else{
+                userlist_lay.setVisibility(View.VISIBLE);
+                empty0.setVisibility(View.VISIBLE);
+                exchange_tv.setText("单人签到");
+            }
         }
     }
 
@@ -178,7 +210,7 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
     }
     
 
-    @OnClick({R.id.back_igv, R.id.commit_tv, R.id.time_lay})
+    @OnClick({R.id.back_igv, R.id.commit_tv, R.id.time_lay,R.id.exchange_tv,R.id.userlist_lay})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.back_igv:
@@ -192,11 +224,11 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                             "需要访问手机内存权限？");
                     return;
                 }
-                final String time = time_tv.getText().toString().trim();
-                int level = 1;
-                String content = content_edt.getText().toString().trim();
-                String comments = comments_edt.getText().toString().trim();
-                String homework = homework_edt.getText().toString().trim();
+                 String time = time_tv.getText().toString().trim();
+                 int level = 1;
+                 String content = content_edt.getText().toString().trim();
+                 String comments = comments_edt.getText().toString().trim();
+                 String homework = homework_edt.getText().toString().trim();
                 if(time.isEmpty()){
                     ToastUtil.showShortToast("请选择签到时间");
                     return;
@@ -221,51 +253,8 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 }
 
                 if(state == 1){//新增
-                    final StudentDetails stde = new StudentDetails();
-                    stde.setName(name);
-                    stde.setTime(time);
-                    stde.setMoney(AppConfig.PRICE);
-                    stde.setCount(1);
-                    stde.setFlag(1);
-                    stde.setLevel(level);
-                    stde.setContent(content);
-                    stde.setComments(comments);
-                    stde.setHomework(homework);
-                    stde.setOwner(student);
+                     signStuWhitList(students,level,content,comments,homework,time);
 
-                    AVQuery<StudentDetails> query = AVQuery.getQuery(StudentDetails.class);
-                    query.whereEqualTo(StudentDetails.NAME,student.getName());
-                    query.whereEqualTo(StudentDetails.TIME,time);
-                    query.whereEqualTo(StudentDetails.FLAG,1);
-                    getAVManager().setOnAVUtilListener(query, true, new AVUtil.OnAVUtilListener() {
-                        @Override
-                        public void onSuccess(List<AVObject> list) {
-                            if(list == null || list.size() == 0){
-                                //减少学员概述中的剩余次数
-                                student.setSignTime(time);
-                                student.setLastCount(student.getLastCount() - 1);
-                                student.setLastMoney(student.getLastMoney() - AppConfig.PRICE);
-
-                                //学员签到历史记录增加
-                                stde.saveInBackground(new SaveCallback() {
-                                    @Override
-                                    public void done(AVException e) {
-                                        if(e == null){
-                                            BaseEvent event = new BaseEvent();
-                                            event.setCode(1);
-                                            EventBus.getDefault().post(event);
-
-                                            ToastUtil.showShortToast("签到成功！");
-                                            finish();
-                                        }
-                                    }
-                                });
-
-                            }else{
-                                ToastUtil.showShortToast("当天已经签过到啦");
-                            }
-                        }
-                    });
                 }else if(state == 2){//修改
                     details.setTime(time);
                     details.setLevel(level);
@@ -286,7 +275,89 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
             case R.id.time_lay:
                 SelectorTimeUtil.choseDateTime(time_tv, null, SignActivity.this);
                 break;
+            case R.id.exchange_tv:
+                isSingle = !isSingle;
+                isSingleMode();
+                break;
+            case R.id.userlist_lay:
+                if(students.isEmpty()){
+                    students.add(student);
+                }
+                new DialogSelectStu(this,students , new DialogSelectStu.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(List<Student> studentList) {
+                        students.clear();
+                        if(studentList == null || studentList.isEmpty()){
+                            students.add(student);
+                        }else{
+                            students.addAll(studentList);
+                        }
+                        StringBuffer sb = new StringBuffer();
+                        for (int i = 0; i < students.size(); i++) {
+                            sb.append(students.get(i).getName());
+                            if(i < students.size() -1){
+                                sb.append(",");
+                            }
+                        }
+                        userlist_tv.setText(sb.toString());
+                    }
+                }).show();
+                break;
         }
+    }
+
+
+    private void signStuWhitList(ArrayList<Student> students,int level,String content,
+                                 String comments,String homework,final String time){
+        if(isSingle || (!isSingle && students.isEmpty())){
+            students.clear();
+            students.add(student);
+        }
+        for (int i = 0; i < students.size(); i++) {
+            final Student stu = students.get(i);
+            final StudentDetails stdd = new StudentDetails();
+            stdd.setName(stu.getName());
+            stdd.setTime(time);
+            stdd.setMoney(AppConfig.PRICE);
+            stdd.setCount(1);
+            stdd.setFlag(1);
+            stdd.setLevel(level);
+            stdd.setContent(content);
+            stdd.setComments(comments);
+            stdd.setHomework(homework);
+            stdd.setOwner(stu);
+
+            AVQuery<StudentDetails> query = AVQuery.getQuery(StudentDetails.class);
+            query.whereEqualTo(StudentDetails.NAME,stu.getName());
+            query.whereEqualTo(StudentDetails.TIME,time);
+            query.whereEqualTo(StudentDetails.FLAG,1);
+            getAVManager().setOnAVUtilListener(query, true,stdd ,stu,new AVUtil.OnAVUtilWithStuListener() {
+                @Override
+                public void onSuccess(List<AVObject> list, StudentDetails studentDetails, final Student student) {
+                    if(list == null || list.size() == 0){
+
+                        //学员签到历史记录增加
+                        studentDetails.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(AVException e) {
+                                if(e == null){
+                                    BaseEvent event = new BaseEvent();
+                                    event.setCode(1);
+                                    EventBus.getDefault().post(event);
+
+                                    ToastUtil.showShortToast(student.getName()+"签到成功！");
+                                    finish();
+                                }
+                            }
+                        });
+
+                    }else{
+                        ToastUtil.showShortToast(student.getName()+"当天已经签过到啦");
+                    }
+                }
+            });
+        }
+
     }
 
     public void requestPermission(Context context, String[] mPermissionList, String msg) {

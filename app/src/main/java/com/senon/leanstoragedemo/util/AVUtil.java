@@ -8,6 +8,8 @@ import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.FindCallback;
 import com.senon.leanstoragedemo.base.BaseApplication;
+import com.senon.leanstoragedemo.entity.Student;
+import com.senon.leanstoragedemo.entity.StudentDetails;
 import com.senon.leanstoragedemo.util.ToastUtil;
 
 import java.util.List;
@@ -22,15 +24,16 @@ public class AVUtil<T extends AVQuery<AVObject>>{
     private T t;
     private Context context;
     private OnAVUtilListener listener;
+    private OnAVUtilWithStuListener stuListener;
     private SweetAlertDialog sad;
 
     public AVUtil(Context context) {
         this.context = context;
     }
 
-    public void setOnAVUtilListener(AVQuery t, boolean showDialog,final OnAVUtilListener listener) {
+    public void setOnAVUtilListener(AVQuery avQueryt, boolean showDialog,final OnAVUtilListener listener) {
         this.listener = listener;
-        this.t = (T) t;
+        this.t = (T) avQueryt;
         showDialog(showDialog);
         t.findInBackground(new FindCallback<AVObject>() {
             @Override
@@ -49,6 +52,25 @@ public class AVUtil<T extends AVQuery<AVObject>>{
                 }
             }
         });
+    }
+
+    public void setOnAVUtilListener(AVQuery t, boolean showDialog, final StudentDetails studentDetails
+            , final Student student, final OnAVUtilWithStuListener listener){
+        this.stuListener = listener;
+        this.t = (T) t;
+        showDialog(showDialog);
+        t.findInBackground(new FindCallback<AVObject>() {
+            @Override
+            public void done(List<AVObject> list, AVException e) {
+                dismissDialog();
+                if(e == null){
+                    stuListener.onSuccess(list,studentDetails,student);
+                }else{
+                    ToastUtil.showShortToast("连接错误，请稍后！");
+                }
+            }
+        });
+
     }
 
     public void setOnAVUtilListener(AVQuery t, final OnAVUtilListener listener){
@@ -74,6 +96,12 @@ public class AVUtil<T extends AVQuery<AVObject>>{
 
     public interface OnAVUtilListener{
         void onSuccess(List<AVObject> list);
+//        void onFailer();
+//        void onZero();
+    }
+
+    public interface OnAVUtilWithStuListener{
+        void onSuccess(List<AVObject> list,StudentDetails studentDetails,Student student);
 //        void onFailer();
 //        void onZero();
     }

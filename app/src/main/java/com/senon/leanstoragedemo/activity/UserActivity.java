@@ -111,7 +111,7 @@ public class UserActivity extends BaseActivity<UserContract.View, UserContract.P
         lrv.scrollToPosition(0);
         currentPage = 0;
         isLoadMore = false;
-        isDownRefesh = false;
+        isDownRefesh = true;
         lrv.forceToRefresh();
     }
 

@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    >
+
 
     <ListView
+        android:layout_above="@+id/sure_tv"
         android:scrollbars="none"
         android:divider="@null"
         android:id="@+id/listView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"/>
 
-    </ListView>
-
-</LinearLayout>
+    <TextView
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:background="@drawable/btn_bg_blue_selector"
+        android:text="确定"
+        android:textColor="@color/white"
+        android:id="@+id/sure_tv"
+        android:layout_width="100dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="40dp"/>
+</RelativeLayout>

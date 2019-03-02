@@ -51,7 +51,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
     private boolean isLoadMore = false;//是否加载更多
     private boolean isDownRefesh = false;//是否下拉刷新
     private int currentPage = 0;//当前页数
-    private int pageLimit = 15;//每页条数
+    private int pageLimit = 20;//每页条数
     private List<AVObject> mData = new ArrayList<>();//原始数据
     private List<AVObject> tempData = new ArrayList<>();//间接数据
     private DialogAdd$Del dialogAdd$Del;
@@ -130,7 +130,7 @@ public class MainActivity extends BaseActivity<MainContract.View, MainContract.P
         lrv.scrollToPosition(0);
         currentPage = 0;
         isLoadMore = false;
-        isDownRefesh = false;
+        isDownRefesh = true;
         lrv.forceToRefresh();
     }
 

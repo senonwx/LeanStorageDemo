@@ -37,19 +37,66 @@
             android:layout_marginRight="12dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:id="@+id/commit_tv"
+            android:id="@+id/exchange_tv"
             android:gravity="center"
             android:background="@color/txt_blue_color"
             android:textColor="@color/white"
             android:textSize="15sp"
-            android:text="提交"
+            android:text="多人签到"
             android:padding="7dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>
 
     <RelativeLayout
+        android:visibility="gone"
         android:layout_below="@+id/layout1"
+        android:layout_marginTop="10dp"
+        android:id="@+id/userlist_lay"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:id="@+id/textview0"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:gravity="center"
+            android:text="多人签到:"
+            android:textColor="@color/person_system_gray_tv"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/userlist_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="14dp"
+            android:layout_toRightOf="@+id/textview0"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/elegant_dialog_description_tv"
+            android:textSize="16sp"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="5dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/click"/>
+    </RelativeLayout>
+
+    <View
+        android:visibility="gone"
+        android:id="@+id/empty0"
+        android:layout_below="@+id/userlist_lay"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@color/txt_gray_color"/>
+
+    <RelativeLayout
+        android:layout_below="@+id/empty0"
         android:layout_marginTop="10dp"
         android:id="@+id/time_lay"
         android:orientation="horizontal"
@@ -259,4 +306,17 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
 
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:background="@drawable/btn_bg_blue_selector"
+        android:text="提交"
+        android:textColor="@color/white"
+        android:id="@+id/commit_tv"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_height="40dp"/>
 </RelativeLayout>
