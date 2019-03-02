@@ -11,9 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <CheckBox
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginRight="10dp"
             android:id="@+id/checkbox"
+            android:padding="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView

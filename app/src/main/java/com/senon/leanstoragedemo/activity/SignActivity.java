@@ -335,6 +335,11 @@ public class SignActivity extends BaseActivity<BaseView, BasePresenter<BaseView>
                 @Override
                 public void onSuccess(List<AVObject> list, StudentDetails studentDetails, final Student student) {
                     if(list == null || list.size() == 0){
+                        // 减少学员概述中的剩余次数 不需要调用student.saveInBackground()
+                        // 因为 studentDetails.saveInBackground被调用了 间接调用了student的save
+                        student.setSignTime(time);
+                        student.setLastCount(student.getLastCount() - 1);
+                        student.setLastMoney(student.getLastMoney() - AppConfig.PRICE);
 
                         //学员签到历史记录增加
                         studentDetails.saveInBackground(new SaveCallback() {
